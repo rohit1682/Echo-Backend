@@ -21,7 +21,7 @@ npm run seed              # optional: demo user + sample data
 npm run start:dev
 ```
 
-The API listens on `http://localhost:4000/api` by default. Health check: `GET /api/health`.
+The API listens on `http://localhost:4001/api` by default. Health check: `GET /api/health`.
 
 You need a MongoDB instance. Either:
 
@@ -95,7 +95,7 @@ the corresponding stub route from `finance-stubs.module.ts`.
 ## API quick reference
 
 See [`requests.http`](requests.http) for a ready-to-run collection (VS Code REST Client / IntelliJ).
-Base URL `http://localhost:4000/api`.
+Base URL `http://localhost:4001/api`.
 
 - `POST /auth/register` · `POST /auth/login` · `POST /auth/refresh` · `GET /auth/me`
 - `GET/POST /tags` · `PATCH/DELETE /tags/:id`

@@ -15,7 +15,7 @@ Create `Echo-Backend/.env` (copy from [.env.example](.env.example)) and set:
 | `MONGODB_URI` | **Yes** | Your MongoDB connection string | Local mongod, or MongoDB Atlas free tier (see §2) |
 | `JWT_ACCESS_SECRET` | **Yes** | A long random string | `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"` |
 | `JWT_REFRESH_SECRET` | **Yes** | A different long random string | same command as above |
-| `PORT` | No | API port (default `4000`) | — |
+| `PORT` | No | API port (default `4001`) | — |
 | `CORS_ORIGINS` | Prod | Comma-separated allowed app origins | your deployed web/app origin(s); `*` only in dev |
 | `GOOGLE_CLIENT_IDS` | **Not needed now** | — | **Google sign-in is disabled in the app UI** (the button is hidden). Leave blank. The backend endpoint stays but is dormant; to re-enable later, add OAuth client IDs from the [Google Cloud Console](https://console.cloud.google.com/) and restore the button (see the frontend `SETUP.md`). |
 | `ANTHROPIC_API_KEY` | Optional | Claude API key | [console.anthropic.com](https://console.anthropic.com/). **Leave blank** to run the Advisor free (rules-only). Costs apply if set. |
@@ -51,7 +51,7 @@ npm install
 npm run seed         # optional: creates the demo user + sample data
 npm run start:dev
 ```
-Verify: open `http://localhost:4000/api/health` → `{"status":"ok","db":"up",...}`.
+Verify: open `http://localhost:4001/api/health` → `{"status":"ok","db":"up",...}`.
 
 ---
 
@@ -93,7 +93,7 @@ COPY package*.json ./
 RUN npm ci
 COPY . .
 RUN npm run build
-EXPOSE 4000
+EXPOSE 4001
 CMD ["npm","run","start:prod"]
 ```
 

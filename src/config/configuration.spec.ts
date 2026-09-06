@@ -25,7 +25,7 @@ describe('configuration', () => {
 
     const config = configuration();
     expect(config.env).toBe('development');
-    expect(config.port).toBe(4000);
+    expect(config.port).toBe(4001);
     expect(config.corsOrigins).toEqual(['*']);
     expect(config.mongoUri).toContain('mongodb://');
     expect(config.googleClientIds).toEqual([]);

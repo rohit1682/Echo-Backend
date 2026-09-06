@@ -1,7 +1,7 @@
 ### Echo API — REST Client collection (VS Code "REST Client" / JetBrains HTTP client)
 ### Run top to bottom. @token / @refresh are captured from the login response.
 
-@baseUrl = http://localhost:4000/api
+@baseUrl = http://localhost:4001/api
 
 ### Health (public)
 GET {{baseUrl}}/health

@@ -36,7 +36,7 @@ const splitCsv = (value?: string): string[] =>
 
 export default (): AppConfig => ({
   env: process.env.NODE_ENV ?? 'development',
-  port: parseInt(process.env.PORT ?? '4000', 10),
+  port: parseInt(process.env.PORT ?? '4001', 10),
   corsOrigins: splitCsv(process.env.CORS_ORIGINS ?? '*'),
   mongoUri: process.env.MONGODB_URI ?? 'mongodb://127.0.0.1:27017/echo',
   jwt: {
