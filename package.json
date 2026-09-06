@@ -91,7 +91,11 @@
       "**/*.(t|j)s",
       "!**/main.ts",
       "!**/database/seed.ts",
-      "!**/*.module.ts"
+      "!**/*.module.ts",
+      "!**/schemas/**",
+      "!**/dto/**",
+      "!**/common/enums.ts",
+      "!**/*.types.ts"
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",

@@ -11,13 +11,20 @@ export interface AuthUser {
 }
 
 /**
+ * Resolves the current user (or one of its fields) from the request. Exported
+ * separately so it can be unit-tested without the Nest param-decorator plumbing.
+ */
+export function currentUserFactory(
+  data: keyof AuthUser | undefined,
+  ctx: ExecutionContext,
+): AuthUser | string | undefined {
+  const request = ctx.switchToHttp().getRequest();
+  const user: AuthUser = request.user;
+  return data ? user?.[data] : user;
+}
+
+/**
  * Convenience decorator: `@CurrentUser() user: AuthUser` in a controller.
  * Pass a key to pluck a single field: `@CurrentUser('userId') userId: string`.
  */
-export const CurrentUser = createParamDecorator(
-  (data: keyof AuthUser | undefined, ctx: ExecutionContext): AuthUser | string | undefined => {
-    const request = ctx.switchToHttp().getRequest();
-    const user: AuthUser = request.user;
-    return data ? user?.[data] : user;
-  },
-);
+export const CurrentUser = createParamDecorator(currentUserFactory);
