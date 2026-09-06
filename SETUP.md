@@ -17,14 +17,15 @@ Create `Echo-Backend/.env` (copy from [.env.example](.env.example)) and set:
 | `JWT_REFRESH_SECRET` | **Yes** | A different long random string | same command as above |
 | `PORT` | No | API port (default `4000`) | — |
 | `CORS_ORIGINS` | Prod | Comma-separated allowed app origins | your deployed web/app origin(s); `*` only in dev |
-| `GOOGLE_CLIENT_IDS` | Optional | Google OAuth client IDs (web/android/ios) | [Google Cloud Console](https://console.cloud.google.com/) → Credentials → OAuth client IDs. Needed only for "Sign in with Google". |
+| `GOOGLE_CLIENT_IDS` | **Not needed now** | — | **Google sign-in is disabled in the app UI** (the button is hidden). Leave blank. The backend endpoint stays but is dormant; to re-enable later, add OAuth client IDs from the [Google Cloud Console](https://console.cloud.google.com/) and restore the button (see the frontend `SETUP.md`). |
 | `ANTHROPIC_API_KEY` | Optional | Claude API key | [console.anthropic.com](https://console.anthropic.com/). **Leave blank** to run the Advisor free (rules-only). Costs apply if set. |
 | `ANTHROPIC_MODEL` | Optional | Model id (default `claude-opus-5`) | Use `claude-haiku-4-5` or `claude-sonnet-5` for lower cost. |
-| `SMS_PROVIDER` | Optional | `console` (free, dev) | For **production phone-OTP** you'll need a paid/trial SMS provider (Twilio, MSG91). There is no truly free production SMS. Wire it in `src/modules/auth/otp/sms-provider.ts`. |
+| `SMS_PROVIDER` | Optional | `console` (free, dev) | Phone-OTP uses the free console provider in dev (logs the code). For **production** phone-OTP you'd need a paid/trial SMS provider (Twilio, MSG91) — not required now. |
 
-> **Google Sign-In / phone OTP are the only things that need external accounts, and both are
-> optional.** Email/password auth, the whole finance slice, and the Advisor's rules engine work with
-> just `MONGODB_URI` + the two JWT secrets.
+> **Nothing here needs a paid account.** Google sign-in is disabled in the UI (and Apple sign-in,
+> which would need a paid Apple Developer account, is not shown either). Email/password auth, the
+> whole finance slice, and the Advisor's rules engine work with just `MONGODB_URI` + the two JWT
+> secrets. `ANTHROPIC_API_KEY` is the only setting that costs money, and it's off by default.
 
 ---
 
