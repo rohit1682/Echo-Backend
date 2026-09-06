@@ -1,0 +1,3 @@
+echo "🔎 Echo backend pre-commit: lint + tests (100% coverage gate)"
+npm run lint:check || { echo "❌ Lint issues found. Fix them before committing."; exit 1; }
+npm run test:cov || { echo "❌ Tests failed or coverage below 100%. See the report above."; exit 1; }

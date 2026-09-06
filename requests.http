@@ -1,0 +1,94 @@
+### Echo API — REST Client collection (VS Code "REST Client" / JetBrains HTTP client)
+### Run top to bottom. @token / @refresh are captured from the login response.
+
+@baseUrl = http://localhost:4000/api
+
+### Health (public)
+GET {{baseUrl}}/health
+
+### Register (public)
+# @name register
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "demo@echo.app",
+  "password": "Password123",
+  "name": "Demo User"
+}
+
+### Login (public) — captures tokens
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "demo@echo.app",
+  "password": "Password123"
+}
+
+@token = {{login.response.body.accessToken}}
+@refresh = {{login.response.body.refreshToken}}
+
+### Who am I
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{token}}
+
+### Full profile + preferences
+GET {{baseUrl}}/users/me
+Authorization: Bearer {{token}}
+
+### Create a tag
+# @name tag
+POST {{baseUrl}}/tags
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "name": "Long Term", "color": "#06b6d4" }
+
+### List tags
+GET {{baseUrl}}/tags
+Authorization: Bearer {{token}}
+
+### Create an investment
+POST {{baseUrl}}/finance/investments
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Nifty 50 Index Fund",
+  "type": "mutual_fund",
+  "investedAmount": 200000,
+  "currentValue": 246500,
+  "riskLevel": "medium",
+  "investmentDate": "2022-04-01",
+  "frequency": "monthly",
+  "symbol": "NIFTY50",
+  "tags": ["{{tag.response.body._id}}"]
+}
+
+### List investments (with filters)
+GET {{baseUrl}}/finance/investments?type=mutual_fund&page=1&limit=20
+Authorization: Bearer {{token}}
+
+### Dashboard summary
+GET {{baseUrl}}/finance/dashboard
+Authorization: Bearer {{token}}
+
+### Net worth (current)
+GET {{baseUrl}}/finance/networth
+Authorization: Bearer {{token}}
+
+### Advisor recommendations
+GET {{baseUrl}}/advisor/recommendations
+Authorization: Bearer {{token}}
+
+### Price quote (mock)
+GET {{baseUrl}}/prices/NIFTY50
+Authorization: Bearer {{token}}
+
+### Refresh access token
+POST {{baseUrl}}/auth/refresh
+Content-Type: application/json
+
+{ "refreshToken": "{{refresh}}" }
