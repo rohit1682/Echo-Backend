@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: [feat/foundation, main]
+  pull_request:
+    branches: [main]
+
+# Cancel superseded runs on the same ref.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    name: Lint, test (100% coverage) & build
+    runs-on: ubuntu-latest
+    env:
+      HUSKY: 0 # don't install git hooks in CI
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint:check
+      - run: npm run test:cov
+      - run: npm run build
