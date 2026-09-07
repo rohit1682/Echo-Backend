@@ -23,7 +23,9 @@ describe('TagsService', () => {
       sort: jest.fn().mockReturnValue({ exec: jest.fn().mockResolvedValue(['t']) }),
     });
     await expect(service.list(USER)).resolves.toEqual(['t']);
-    expect(model.find).toHaveBeenCalledWith({ userId: USER });
+    const arg = model.find.mock.calls[0][0];
+    expect(arg.userId).toBeInstanceOf(Types.ObjectId);
+    expect(String(arg.userId)).toBe(USER);
   });
 
   it('create persists a tag', async () => {

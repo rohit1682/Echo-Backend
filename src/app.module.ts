@@ -19,10 +19,13 @@ import { InvestmentsModule } from './modules/finance/investments/investments.mod
 import { AssetsModule } from './modules/finance/assets/assets.module';
 import { LoansModule } from './modules/finance/loans/loans.module';
 import { NetWorthModule } from './modules/finance/networth/networth.module';
+import { ExpensesModule } from './modules/finance/expenses/expenses.module';
+import { BudgetsModule } from './modules/finance/budgets/budgets.module';
 import { DashboardModule } from './modules/finance/dashboard/dashboard.module';
 import { PricesModule } from './modules/prices/prices.module';
 import { AdvisorModule } from './modules/advisor/advisor.module';
 import { FinanceStubsModule } from './modules/finance/stubs/finance-stubs.module';
+import { TasksModule } from './modules/activity/tasks/tasks.module';
 import { ActivityStubsModule } from './modules/activity/activity-stubs.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 
@@ -55,6 +58,8 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     AssetsModule,
     LoansModule,
     NetWorthModule,
+    ExpensesModule,
+    BudgetsModule,
     DashboardModule,
     PricesModule,
     FinanceStubsModule,
@@ -63,6 +68,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     AdvisorModule,
 
     // Personal Activity (one section)
+    TasksModule,
     ActivityStubsModule,
 
     // Cross-cutting

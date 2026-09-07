@@ -19,6 +19,7 @@ describe('configuration', () => {
     delete process.env.MONGODB_URI;
     delete process.env.GOOGLE_CLIENT_IDS;
     delete process.env.ANTHROPIC_MODEL;
+    delete process.env.ADVISOR_LLM_ENABLED;
     delete process.env.SMS_PROVIDER;
     delete process.env.OTP_TTL_SECONDS;
     delete process.env.PRICE_PROVIDER;
@@ -30,6 +31,7 @@ describe('configuration', () => {
     expect(config.mongoUri).toContain('mongodb://');
     expect(config.googleClientIds).toEqual([]);
     expect(config.anthropic.model).toBe('claude-opus-5');
+    expect(config.advisor.llmEnabled).toBe(false);
     expect(config.otp.provider).toBe('console');
     expect(config.otp.ttlSeconds).toBe(300);
     expect(config.prices.provider).toBe('mock');
@@ -47,6 +49,7 @@ describe('configuration', () => {
     process.env.GOOGLE_CLIENT_IDS = 'id1,id2';
     process.env.ANTHROPIC_API_KEY = 'key';
     process.env.ANTHROPIC_MODEL = 'claude-sonnet-5';
+    process.env.ADVISOR_LLM_ENABLED = 'true';
     process.env.SMS_PROVIDER = 'twilio';
     process.env.OTP_TTL_SECONDS = '120';
     process.env.PRICE_PROVIDER = 'real';
@@ -64,6 +67,7 @@ describe('configuration', () => {
     });
     expect(config.googleClientIds).toEqual(['id1', 'id2']);
     expect(config.anthropic).toEqual({ apiKey: 'key', model: 'claude-sonnet-5' });
+    expect(config.advisor).toEqual({ llmEnabled: true });
     expect(config.otp).toEqual({ provider: 'twilio', ttlSeconds: 120 });
     expect(config.prices).toEqual({ provider: 'real', apiKey: 'pk' });
   });

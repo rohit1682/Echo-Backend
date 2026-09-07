@@ -18,7 +18,18 @@ import { Tag } from '../modules/tags/schemas/tag.schema';
 import { Investment } from '../modules/finance/investments/schemas/investment.schema';
 import { Asset } from '../modules/finance/assets/schemas/asset.schema';
 import { Loan } from '../modules/finance/loans/schemas/loan.schema';
-import { AssetCategory, AuthProvider, Frequency, InvestmentType, RiskLevel } from '../common/enums';
+import { NetWorthSnapshot } from '../modules/finance/networth/schemas/networth-snapshot.schema';
+import { Expense } from '../modules/finance/stubs/schemas/expense.schema';
+import { Budget } from '../modules/finance/stubs/schemas/budget.schema';
+import { Task } from '../modules/activity/schemas/task.schema';
+import {
+  AssetCategory,
+  AuthProvider,
+  Frequency,
+  InvestmentType,
+  RiskLevel,
+  TaskPriority,
+} from '../common/enums';
 
 async function seed() {
   const logger = new Logger('Seed');
@@ -29,6 +40,10 @@ async function seed() {
   const investmentModel = app.get<Model<Investment>>(getModelToken(Investment.name));
   const assetModel = app.get<Model<Asset>>(getModelToken(Asset.name));
   const loanModel = app.get<Model<Loan>>(getModelToken(Loan.name));
+  const snapshotModel = app.get<Model<NetWorthSnapshot>>(getModelToken(NetWorthSnapshot.name));
+  const expenseModel = app.get<Model<Expense>>(getModelToken(Expense.name));
+  const budgetModel = app.get<Model<Budget>>(getModelToken(Budget.name));
+  const taskModel = app.get<Model<Task>>(getModelToken(Task.name));
 
   const email = 'demo@echo.app';
 
@@ -41,6 +56,10 @@ async function seed() {
       assetModel.deleteMany({ userId: uid }),
       loanModel.deleteMany({ userId: uid }),
       tagModel.deleteMany({ userId: uid }),
+      snapshotModel.deleteMany({ userId: uid }),
+      expenseModel.deleteMany({ userId: uid }),
+      budgetModel.deleteMany({ userId: uid }),
+      taskModel.deleteMany({ userId: uid }),
     ]);
     await userModel.deleteOne({ _id: uid });
     logger.log('Removed existing demo data');
@@ -64,7 +83,7 @@ async function seed() {
     { userId, name: 'High Risk', color: '#ef4444' },
   ]);
 
-  await investmentModel.create([
+  const investments = await investmentModel.create([
     {
       userId,
       name: 'Nifty 50 Index Fund',
@@ -121,7 +140,7 @@ async function seed() {
     },
   ]);
 
-  await assetModel.create([
+  const assets = await assetModel.create([
     {
       userId,
       name: 'HDFC Savings Account',
@@ -139,7 +158,7 @@ async function seed() {
     },
   ]);
 
-  await loanModel.create([
+  const loans = await loanModel.create([
     {
       userId,
       name: 'Home Loan',
@@ -162,6 +181,99 @@ async function seed() {
       emiAmount: 8500,
     },
   ]);
+
+  // Net-worth history so the trend chart has real data to draw.
+  const currentAssets =
+    investments.reduce((s, i) => s + (i.currentValue ?? 0), 0) +
+    assets.reduce((s, a) => s + (a.currentValue ?? 0), 0);
+  const currentLiabilities = loans.reduce((s, l) => s + (l.outstanding ?? 0), 0);
+  const currentNetWorth = currentAssets - currentLiabilities;
+
+  const MONTHS = 12;
+  // A year ago net worth was lower (fewer gains, larger loan balances); trend upward to today.
+  const startNetWorth = currentNetWorth - 520000;
+  const snapshots = Array.from({ length: MONTHS }, (_, i) => {
+    const t = i / (MONTHS - 1);
+    const base = startNetWorth + (currentNetWorth - startNetWorth) * t;
+    // A little organic wobble on the intermediate points; land exactly on today's value.
+    const noise = i === MONTHS - 1 ? 0 : Math.round(Math.sin(i * 1.7) * 45000);
+    const liabilities = Math.round(currentLiabilities + (MONTHS - 1 - i) * 12000);
+    const netWorth = Math.round(base) + noise;
+    const capturedAt = new Date();
+    capturedAt.setMonth(capturedAt.getMonth() - (MONTHS - 1 - i));
+    return {
+      userId,
+      totalAssets: netWorth + liabilities,
+      totalLiabilities: liabilities,
+      netWorth,
+      capturedAt,
+    };
+  });
+  await snapshotModel.create(snapshots);
+  logger.log(`Created ${MONTHS} net-worth snapshots`);
+
+  // A monthly budget and some expenses within the current month.
+  await budgetModel.create([
+    { userId, name: 'Monthly spending', limit: 45000, period: Frequency.MONTHLY, currency: 'INR' },
+  ]);
+  const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  const daysIntoMonth = Math.max(1, Math.floor((Date.now() - monthStart.getTime()) / 86400000));
+  const expenseSeed = [
+    { amount: 4200, description: 'Groceries' },
+    { amount: 1800, description: 'Dining out' },
+    { amount: 2500, description: 'Fuel' },
+    { amount: 999, description: 'Streaming subscriptions' },
+    { amount: 6500, description: 'Electricity bill' },
+    { amount: 3200, description: 'Pharmacy' },
+  ];
+  await expenseModel.create(
+    expenseSeed.map((e, i) => ({
+      userId,
+      amount: e.amount,
+      description: e.description,
+      currency: 'INR',
+      spentAt: new Date(monthStart.getTime() + Math.min(daysIntoMonth - 1, i * 3) * 86400000),
+    })),
+  );
+  logger.log(`Created ${expenseSeed.length} expenses + 1 budget`);
+
+  // Personal Activity tasks (some with due dates so the calendar has markers).
+  const day = 24 * 60 * 60 * 1000;
+  await taskModel.create([
+    {
+      userId,
+      title: 'Pay home loan EMI',
+      priority: TaskPriority.HIGH,
+      dueDate: new Date(Date.now() + 12 * day),
+      recurrence: Frequency.MONTHLY,
+    },
+    {
+      userId,
+      title: 'Review investment portfolio',
+      priority: TaskPriority.MEDIUM,
+      dueDate: new Date(Date.now() + 3 * day),
+    },
+    {
+      userId,
+      title: 'Renew car insurance',
+      priority: TaskPriority.HIGH,
+      dueDate: new Date(Date.now() + 20 * day),
+    },
+    {
+      userId,
+      title: 'Buy groceries',
+      priority: TaskPriority.LOW,
+      dueDate: new Date(Date.now() + 1 * day),
+    },
+    {
+      userId,
+      title: 'Call financial advisor',
+      priority: TaskPriority.MEDIUM,
+      completed: true,
+      completedAt: new Date(Date.now() - 2 * day),
+    },
+  ]);
+  logger.log('Created 5 tasks');
 
   logger.log('Seed complete. Login: demo@echo.app / Password123');
   await app.close();

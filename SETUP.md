@@ -18,14 +18,17 @@ Create `Echo-Backend/.env` (copy from [.env.example](.env.example)) and set:
 | `PORT` | No | API port (default `4001`) | — |
 | `CORS_ORIGINS` | Prod | Comma-separated allowed app origins | your deployed web/app origin(s); `*` only in dev |
 | `GOOGLE_CLIENT_IDS` | **Not needed now** | — | **Google sign-in is disabled in the app UI** (the button is hidden). Leave blank. The backend endpoint stays but is dormant; to re-enable later, add OAuth client IDs from the [Google Cloud Console](https://console.cloud.google.com/) and restore the button (see the frontend `SETUP.md`). |
-| `ANTHROPIC_API_KEY` | Optional | Claude API key | [console.anthropic.com](https://console.anthropic.com/). **Leave blank** to run the Advisor free (rules-only). Costs apply if set. |
+| `ADVISOR_LLM_ENABLED` | Optional | `false` (default) | Master switch for the paid Claude advice layer. **Off by default** — the Advisor runs on the free rules engine. AI is used only when this is `true` **and** a key is set below, so no spend can happen accidentally. |
+| `ANTHROPIC_API_KEY` | Optional | Claude API key | [console.anthropic.com](https://console.anthropic.com/). **Leave blank** to run the Advisor free (rules-only). Even if set, AI stays off unless `ADVISOR_LLM_ENABLED=true`. Costs apply only when both are enabled. |
 | `ANTHROPIC_MODEL` | Optional | Model id (default `claude-opus-5`) | Use `claude-haiku-4-5` or `claude-sonnet-5` for lower cost. |
 | `SMS_PROVIDER` | Optional | `console` (free, dev) | Phone-OTP uses the free console provider in dev (logs the code). For **production** phone-OTP you'd need a paid/trial SMS provider (Twilio, MSG91) — not required now. |
 
 > **Nothing here needs a paid account.** Google sign-in is disabled in the UI (and Apple sign-in,
 > which would need a paid Apple Developer account, is not shown either). Email/password auth, the
 > whole finance slice, and the Advisor's rules engine work with just `MONGODB_URI` + the two JWT
-> secrets. `ANTHROPIC_API_KEY` is the only setting that costs money, and it's off by default.
+> secrets. The paid Claude advice layer is the only setting that costs money, and it's **off by
+> default** (guarded by `ADVISOR_LLM_ENABLED=false`) — it never runs unless you deliberately flip
+> that flag *and* add a key.
 
 ---
 

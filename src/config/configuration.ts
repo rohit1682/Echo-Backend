@@ -18,6 +18,14 @@ export interface AppConfig {
     apiKey: string;
     model: string;
   };
+  advisor: {
+    /**
+     * Master switch for the paid Claude advice layer. OFF by default: the Advisor
+     * runs on the free rules engine unless this is explicitly `true` AND an
+     * `ANTHROPIC_API_KEY` is set. Prevents any accidental API spend.
+     */
+    llmEnabled: boolean;
+  };
   otp: {
     provider: string;
     ttlSeconds: number;
@@ -49,6 +57,9 @@ export default (): AppConfig => ({
   anthropic: {
     apiKey: process.env.ANTHROPIC_API_KEY ?? '',
     model: process.env.ANTHROPIC_MODEL ?? 'claude-opus-5',
+  },
+  advisor: {
+    llmEnabled: process.env.ADVISOR_LLM_ENABLED === 'true',
   },
   otp: {
     provider: process.env.SMS_PROVIDER ?? 'console',

@@ -8,10 +8,16 @@ jest.mock('@anthropic-ai/sdk', () => ({
   default: jest.fn().mockImplementation(() => ({ messages: { create: mockCreate } })),
 }));
 
-function makeConfig(apiKey?: string) {
+function makeConfig(apiKey?: string, llmEnabled = true) {
   return {
     get: jest.fn((key: string) =>
-      key === 'anthropic.apiKey' ? apiKey : key === 'anthropic.model' ? 'claude-opus-5' : undefined,
+      key === 'anthropic.apiKey'
+        ? apiKey
+        : key === 'anthropic.model'
+          ? 'claude-opus-5'
+          : key === 'advisor.llmEnabled'
+            ? llmEnabled
+            : undefined,
     ),
   } as any;
 }
@@ -50,6 +56,13 @@ describe('LlmAdvisor', () => {
     const advisor = new LlmAdvisor(makeConfig(undefined));
     expect(advisor.enabled).toBe(false);
     await expect(advisor.enhance(signals, ctx)).resolves.toBeNull();
+  });
+
+  it('stays disabled when a key is set but the ADVISOR_LLM_ENABLED flag is off', async () => {
+    const advisor = new LlmAdvisor(makeConfig('key', false));
+    expect(advisor.enabled).toBe(false);
+    await expect(advisor.enhance(signals, ctx)).resolves.toBeNull();
+    expect(mockCreate).not.toHaveBeenCalled();
   });
 
   it('defaults the model when none is configured', () => {

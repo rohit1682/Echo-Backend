@@ -59,6 +59,10 @@ export class NetWorthService {
   }
 
   history(userId: string, limit = 90): Promise<NetWorthSnapshotDocument[]> {
-    return this.snapshotModel.find({ userId }).sort({ capturedAt: -1 }).limit(limit).exec();
+    return this.snapshotModel
+      .find({ userId: new Types.ObjectId(userId) })
+      .sort({ capturedAt: -1 })
+      .limit(limit)
+      .exec();
   }
 }
