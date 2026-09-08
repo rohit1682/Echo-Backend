@@ -9,7 +9,10 @@ export class TagsService {
   constructor(@InjectModel(Tag.name) private readonly tagModel: Model<TagDocument>) {}
 
   list(userId: string): Promise<TagDocument[]> {
-    return this.tagModel.find({ userId }).sort({ name: 1 }).exec();
+    return this.tagModel
+      .find({ userId: new Types.ObjectId(userId) })
+      .sort({ name: 1 })
+      .exec();
   }
 
   async create(userId: string, dto: CreateTagDto): Promise<TagDocument> {
@@ -23,14 +26,20 @@ export class TagsService {
 
   async update(userId: string, id: string, dto: UpdateTagDto): Promise<TagDocument> {
     const tag = await this.tagModel
-      .findOneAndUpdate({ _id: id, userId }, { $set: dto }, { new: true })
+      .findOneAndUpdate(
+        { _id: id, userId: new Types.ObjectId(userId) },
+        { $set: dto },
+        { new: true },
+      )
       .exec();
     if (!tag) throw new NotFoundException('Tag not found');
     return tag;
   }
 
   async remove(userId: string, id: string): Promise<void> {
-    const res = await this.tagModel.deleteOne({ _id: id, userId }).exec();
+    const res = await this.tagModel
+      .deleteOne({ _id: id, userId: new Types.ObjectId(userId) })
+      .exec();
     if (res.deletedCount === 0) throw new NotFoundException('Tag not found');
   }
 }

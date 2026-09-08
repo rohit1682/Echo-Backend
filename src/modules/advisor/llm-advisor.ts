@@ -5,25 +5,29 @@ import { AdvisorContext, Recommendation, Signal } from './advisor.types';
 import { RecommendationDomain, RecommendationSeverity } from '../../common/enums';
 
 /**
- * Optional natural-language layer over the deterministic rules engine. When
- * `ANTHROPIC_API_KEY` is configured it turns the structured signals + a compact
- * data summary into prioritized, conversational advice. With no key it is
- * inert and the caller falls back to the free templated rule messages.
+ * Optional natural-language layer over the deterministic rules engine. It only
+ * turns the structured signals + a compact data summary into conversational
+ * advice when the paid layer is explicitly switched on (`ADVISOR_LLM_ENABLED=true`)
+ * AND an `ANTHROPIC_API_KEY` is configured. By default both are off, so this is
+ * inert and the caller falls back to the free templated rule messages — no API
+ * spend can happen unless the operator deliberately opts in.
  */
 @Injectable()
 export class LlmAdvisor {
   private readonly logger = new Logger('LlmAdvisor');
   private readonly client: Anthropic | null;
   private readonly model: string;
+  private readonly flagEnabled: boolean;
 
   constructor(private readonly config: ConfigService) {
     const apiKey = this.config.get<string>('anthropic.apiKey');
     this.model = this.config.get<string>('anthropic.model') ?? 'claude-opus-5';
+    this.flagEnabled = this.config.get<boolean>('advisor.llmEnabled') === true;
     this.client = apiKey ? new Anthropic({ apiKey }) : null;
   }
 
   get enabled(): boolean {
-    return this.client !== null;
+    return this.flagEnabled && this.client !== null;
   }
 
   /**
@@ -32,6 +36,7 @@ export class LlmAdvisor {
    */
   async enhance(signals: Signal[], ctx: AdvisorContext): Promise<Recommendation[] | null> {
     if (!this.client) return null;
+    if (!this.flagEnabled) return null;
 
     const system = [
       'You are Echo Advisor, a prudent personal-finance and productivity assistant.',

@@ -13,19 +13,26 @@ export class LoansService {
   }
 
   list(userId: string): Promise<LoanDocument[]> {
-    return this.model.find({ userId }).sort({ createdAt: -1 }).exec();
+    return this.model
+      .find({ userId: new Types.ObjectId(userId) })
+      .sort({ createdAt: -1 })
+      .exec();
   }
 
   async update(userId: string, id: string, dto: UpdateLoanDto): Promise<LoanDocument> {
     const doc = await this.model
-      .findOneAndUpdate({ _id: id, userId }, { $set: dto }, { new: true })
+      .findOneAndUpdate(
+        { _id: id, userId: new Types.ObjectId(userId) },
+        { $set: dto },
+        { new: true },
+      )
       .exec();
     if (!doc) throw new NotFoundException('Loan not found');
     return doc;
   }
 
   async remove(userId: string, id: string): Promise<void> {
-    const res = await this.model.deleteOne({ _id: id, userId }).exec();
+    const res = await this.model.deleteOne({ _id: id, userId: new Types.ObjectId(userId) }).exec();
     if (res.deletedCount === 0) throw new NotFoundException('Loan not found');
   }
 

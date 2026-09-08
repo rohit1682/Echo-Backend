@@ -54,7 +54,10 @@ export class InvestmentsService {
   }
 
   async findOne(userId: string, id: string): Promise<InvestmentDocument> {
-    const doc = await this.model.findOne({ _id: id, userId }).populate('tags').exec();
+    const doc = await this.model
+      .findOne({ _id: id, userId: new Types.ObjectId(userId) })
+      .populate('tags')
+      .exec();
     if (!doc) throw new NotFoundException('Investment not found');
     return doc;
   }
@@ -63,7 +66,11 @@ export class InvestmentsService {
     const update: Record<string, any> = { ...dto };
     if (dto.tags) update.tags = this.toObjectIds(dto.tags);
     const doc = await this.model
-      .findOneAndUpdate({ _id: id, userId }, { $set: update }, { new: true })
+      .findOneAndUpdate(
+        { _id: id, userId: new Types.ObjectId(userId) },
+        { $set: update },
+        { new: true },
+      )
       .populate('tags')
       .exec();
     if (!doc) throw new NotFoundException('Investment not found');
@@ -71,7 +78,7 @@ export class InvestmentsService {
   }
 
   async remove(userId: string, id: string): Promise<void> {
-    const res = await this.model.deleteOne({ _id: id, userId }).exec();
+    const res = await this.model.deleteOne({ _id: id, userId: new Types.ObjectId(userId) }).exec();
     if (res.deletedCount === 0) throw new NotFoundException('Investment not found');
   }
 
